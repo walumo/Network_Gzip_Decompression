@@ -21,22 +21,21 @@ namespace Network
                 {
                     byte[] compressedResponse = await response.Content.ReadAsByteArrayAsync();
 
-                    using (var inputStream = new MemoryStream(compressedResponse))
-                    using (var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress))
-                    using (var streamReader = new StreamReader(gZipStream))
+                    try
                     {
-                        var decompressed = streamReader.ReadToEnd();
-                        try
+                        using (var inputStream = new MemoryStream(compressedResponse))
+                        using (var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                        using (var streamReader = new StreamReader(gZipStream))
                         {
+                            var decompressed = streamReader.ReadToEnd();
                             return JsonSerializer.Deserialize<T>(decompressed);
-
                         }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("JSON deserialization failed: " + ex.Message);
-                            Console.ReadKey();
-                            return default(T);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        Console.ReadKey();
+                        return default(T);
                     }
                 }
                 else
